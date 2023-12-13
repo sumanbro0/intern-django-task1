@@ -5,5 +5,4 @@ def index(request):
     books=Book.objects.all()
     authors=Author.objects.all()
     aut=authors[0].books.all()
-    print(aut)
     return render(request,"index.html",{"books":books,"authors":authors})
