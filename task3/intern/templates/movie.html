@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container my-4">
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Movies</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Director</th>
+                            <th>Actors</th>
+                            <th>Movies</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{director.name}}</td>
+                            <td>
+
+                                {% for d in director.casts.all %}
+                                <span class="font-weight-bold">{{ forloop.counter }}.
+                                </span>{{d.actors}}<br>
+                                {% endfor %}
+
+                            </td>
+
+
+                            <td>
+                                {% for cast in director.casts.all %}
+                                {% for movie in cast.movies.all %}
+
+                                <span class="font-weight-bold">{{ forloop.parentloop.counter }}.
+                                </span>{{movie.name}}<br>
+                                {% endfor %}
+                                {% endfor %}
+
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

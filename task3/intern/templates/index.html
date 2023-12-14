@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container my-4">
+    {% for director in directors %}
+    <a href="{% url 'movie' id=director.id %}">{{director.name}}</a>
+
+    {% endfor %}
+</div>
+
+{% endblock body %}
