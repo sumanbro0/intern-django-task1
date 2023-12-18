@@ -11,5 +11,24 @@
             <p>Price: {{ product.price }}</p>
         </div>
     </div>
+</div>
+<div class="container my-4">
+    <h2>Comments</h2>
+    {% for comment in comments %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <p class="card-text">{{ comment.text }}</p>
+            <a href="{% url 'update_comment' comment.id %}">Update</a>
+            <a href="{% url 'delete_comment' comment.id %}">Delete</a>
+        </div>
+    </div>
+    {% endfor %}
 
-    {% endblock body %}
+    <h2>Add a comment</h2>
+    <form method="post" action="{% url 'add_comment' product.id %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock body %}

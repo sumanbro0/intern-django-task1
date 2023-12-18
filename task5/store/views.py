@@ -1,8 +1,8 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Product
+from .models import Product,Comments
 
-from .forms import ProductForm
+from .forms import CommentForm, ProductForm
 
 # Create your views here.
 def index(request):
@@ -26,6 +26,41 @@ def add_product(request):
 
     return render(request, "add_products.html", {"form": form})
 
-def product_detail(request,id):
-    product=Product.objects.get(id=id)
-    return render(request, "product_detail.html", {"product":product})
+def product_detail(request, id):
+    product = get_object_or_404(Product, pk=id)
+    comments = Comments.objects.filter(product=product)
+    form = CommentForm()
+    return render(request, 'product_detail.html', {'product': product, 'comments': comments, 'form': form})
+
+
+def add_comment(request, id):
+    product = get_object_or_404(Product, pk=id)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data["text"]
+            Comments.objects.create(text=text, product=product)
+            return redirect('product_detail', id=product.id)
+
+    return redirect('product_detail', id=product.id)
+
+
+def delete_comment(request, id):
+    comment = get_object_or_404(Comments, pk=id)
+    product_id = comment.product.id
+    comment.delete()
+    return redirect('product_detail', id=product_id)
+
+
+def update_comment(request, id):
+    comment = get_object_or_404(Comments, pk=id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment.text = form.cleaned_data['text']
+            comment.save()
+            return redirect('product_detail', id=comment.product.id)
+    else:
+        form = CommentForm(initial={'text': comment.text})
+    return render(request,'ss.html', {"form":form})
