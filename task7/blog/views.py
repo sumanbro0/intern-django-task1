@@ -1,10 +1,14 @@
-from django.shortcuts import  redirect, render
+
+
 from django.contrib.auth import  login,logout,authenticate
 from .models import Post
 from django.contrib.auth.models import User
-# Create your views here.
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Post
+
 def index(request):
-    posts=Post.objects.all()
+    posts=Post.objects.select_related("author").all()
     return render (request,"index.html",{"posts":posts})
 
 
@@ -41,10 +45,6 @@ def logout_view(request):
 
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Post
-from django.core.files.storage import default_storage
 
 @login_required
 def add_post(request):
@@ -59,23 +59,24 @@ def add_post(request):
 
 @login_required
 def update_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.select_related('author'), id=post_id)
     if post.author != request.user:
         return redirect('home')
     if request.method == "POST":
         title = request.POST.get('title')
         desc = request.POST.get('desc')
-        pic = request.FILES['pic']
+        if 'pic' in request.FILES:
+            post.pic = request.FILES['pic']
         post.title = title
         post.desc = desc
-        post.pic = pic
         post.save()
         return redirect('home')
     return render(request, 'update_post.html', {'post': post})
 
 @login_required
 def delete_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.select_related('author'), id=post_id)
+
     if post.author != request.user:
         return redirect('home')
     post.delete()
