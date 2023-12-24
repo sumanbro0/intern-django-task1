@@ -27,14 +27,10 @@
                     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                 </li>
 
-                {% if user.is_authenticated %}
+
+                {% if not request.session.is_in %}
                 <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'add_post' %}">Add post</a>
-                </li>
-                {% endif %}
-                {% if not user.is_authenticated %}
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'signup' %}">signup</a>
+                    <a class="nav-link" href="{% url 'register' %}">signup</a>
                 </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="{% url 'login' %}">login</a>
@@ -44,7 +40,19 @@
                     <a class="nav-link" href="{% url 'logout' %}">logout</a>
                 </li>
 
+                {% if not request.session.is_verified %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'verify_otp' %}">Verify yourself</a>
+                </li>
+                {% else %}
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'post_new' %}">Add post</a>
+                </li>
                 {% endif %}
+                {% endif %}
+
+
 
             </ul>
             <form class="form-inline my-2 my-lg-0">
