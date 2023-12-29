@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load mathfilters %}
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Cart</h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.book.title }}</td>
+                        <td>{{ item.book.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        {% if item.price %}
+                        <td>{{ item.price|mul:item.quantity }}</td> {% endif %}
+                        <td>
+                            <a href="{% url 'remove_from_cart' item.book.id %}" class="btn btn-danger btn-sm">Remove</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3"></td>
+                        <td>Total: {{ total }}</td>
+                        <td>
+                            <a href="{% url 'address' %}" class="btn btn-primary">Checkout</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endblock body %}
