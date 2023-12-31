@@ -17,5 +17,10 @@ urlpatterns = [
     path("address/",views.address,name="address"),
     path("placed_orders/",views.orders,name="placed_orders"),
     path("search/",views.search,name="search"),
-
+    path("wishlist/",views.wishlist,name="wishlist"),
+    path("add_to_wishlist/<int:id>",views.add_to_wishlist,name="add_to_wishlist"),
+    path("remove_from_wishlist/<int:id>",views.remove_from_wishlist,name="remove_from_wishlist"),
+    path("add_review/<int:id>",views.add_review,name="add_review"),
+    path("remove_review/<int:id>",views.remove_review,name="remove_review"),
+  
 ]

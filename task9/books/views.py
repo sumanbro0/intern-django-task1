@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.contrib import messages
 from .mail import send_verification
-from .models import Address, Book, Cart, Order
+from .models import Address, Book, Cart, Order, Review, Wishlist
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.postgres.search import SearchVector
@@ -14,16 +14,30 @@ from django.contrib.postgres.search import SearchVector
 
 
 # Create your views here.
-
 def index(request):
-    books=Book.objects.all()
-    print(books)
-    return render(request,'index.html',{'books':books})
+    books = Book.objects.all()
+    context = {'books': books}
+    if request.user.is_authenticated:
+        wishlist_book_ids = Wishlist.objects.filter(user=request.user).values_list('book', flat=True)
+        cart_book_ids = Cart.objects.filter(user=request.user).values_list('book', flat=True)
+        orders=Order.objects.filter(user=request.user)
+        if len(orders)>=5:
+            context.update({'offer':'25% off on all orders'})
+        context.update({
+            'wishlist_book_ids': wishlist_book_ids,
+            'cart_book_ids': cart_book_ids,
+        })
+
+    return render(request, 'index.html', context)
 
 
 def book(request,id):
     book=Book.objects.get(id=id)
-    return render(request,'book.html',{'book':book})
+    comments=Review.objects.filter(book=book)
+    average_rating = 0
+    if comments:
+        average_rating = sum([i.rating for i in comments]) / len(comments)
+    return render(request,'details.html',{'book':book,'comments':comments, 'average_rating': range(int(average_rating))})
 
 
 
@@ -45,8 +59,9 @@ def log_in(request):
 
 
 def log_out(request):
-    logout(request)
-    messages.success(request,"Logged out successfully")
+    if request.user.is_authenticated:
+        logout(request)
+        messages.success(request,"Logged out successfully")
     return redirect("index")    
 
 def sign_up(request):
@@ -97,9 +112,13 @@ def change_password(request, id):
 @login_required(login_url='login')
 def remove_from_cart(request,id):
     book=Book.objects.get(id=id)
-    cart=Cart.objects.get(book=book,user=request.user)
-    cart.delete()
-    messages.success(request,"Book removed from cart")
+    cart = Cart.objects.filter(book=book, user=request.user)
+    if cart:
+        cart.first().delete()
+        messages.success(request,"Book removed from cart")
+    else:
+        messages.error(request,"Book don't exits")
+
     return redirect("cart")
 
 @login_required(login_url='login')
@@ -134,12 +153,19 @@ def address(request):
 
     return render(request,'address.html',{'addresses':addresses})
 
+
 @login_required(login_url='login')
 def place_order(request):
     addr_id = request.GET.get('address')
     cart = Cart.objects.filter(user=request.user)
     total_price = sum(item.price * item.quantity for item in cart)
     address = Address.objects.get(id=addr_id)
+    
+    num_orders = Order.objects.filter(user=request.user).count()
+    
+    if num_orders > 5:
+        total_price *= 0.75 
+    
     order = Order(user=request.user,address=address,total=total_price)
     order.save()
     for item in cart:
@@ -157,7 +183,6 @@ def orders(request):
 
 def search(request):
     query=request.GET.get('query')
-    print(query)
     books=Book.objects.filter(Q(title__icontains=query) | Q(author__icontains=query) | Q(genre__icontains=query) | Q(desc__icontains=query))
 
     
@@ -166,3 +191,54 @@ def search(request):
 
 
     return render(request,'index.html',{'books':books})
+
+
+@login_required(login_url='login')
+def add_to_wishlist(request,id):
+    book=Book.objects.get(id=id)
+    if not Wishlist.objects.filter(user=request.user, book=book).exists():
+        wishlist=Wishlist.objects.create(user=request.user,book=book)
+        wishlist.save()
+        messages.success(request,"Book added to wishlist")
+    else:
+        messages.error(request,"Book already in wishlist")
+
+    return redirect("index")
+
+@login_required(login_url='login')
+def wishlist(request):
+    wishlist=Wishlist.objects.filter(user=request.user)
+    return render(request,'wishlist.html',{'wishlists':wishlist})
+
+
+@login_required(login_url='login')
+def remove_from_wishlist(request,id):
+    book=Book.objects.get(id=id)
+    wishlist = Wishlist.objects.filter(book=book, user=request.user)
+    if wishlist:
+        wishlist.first().delete()
+        messages.success(request,"Book removed from wishlist")
+    else:
+        messages.error(request,"Book don't exits")
+
+    return redirect("wishlist")
+
+
+@login_required(login_url='login')
+def add_review(request, id):
+    book = Book.objects.get(id=id)
+    comment = request.POST.get('review')
+    rating = request.POST.get('rating')
+    review = Review.objects.create(user=request.user, book=book, comment=comment, rating=rating)
+    review.save()
+    messages.success(request, "Review added successfully")
+    return redirect('book_detail', id=id)
+
+@login_required(login_url='login')
+def remove_review(request, id):
+    review = Review.objects.get(id=id)
+    review.delete()
+    messages.success(request, "Review removed successfully")
+    return redirect('book_detail', id=review.book.id)
+
+

@@ -1,16 +1,46 @@
 {% extends "base.html" %}
 {% load static %}
+{% load social_share %}
+
 {% block body %}
 <div class="row">
+    {% if offer %}
+    <div class="col-md-12">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <strong>{{ offer }}</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+    </div>
+    {% endif %}
     {% for book in books %}
     <div class="col-md-4">
-        <div class="card mb-4">
-            <img class="card-img-top" src="{{ book.image.url }}" alt="{{ book.title }}">
+        <div class="card mb-4" style="height: 450px!important;">
+            <img class="card-img-top" height="220px" src="{{ book.image.url }}" alt="{{ book.title }}">
             <div class="card-body">
                 <h5 class="card-title">{{ book.title }}</h5>
                 <p class="card-text">{{ book.desc|truncatewords:20 }}</p>
-                <a href="{% url 'book_detail' book.id %}" class="btn btn-primary">Read More</a>
-                <a href="{% url 'add_to_cart' book.id %}" class="btn btn-success">Add to Cart</a>
+                <a href="{% url 'book_detail' book.id %}" class="btn btn-sm btn-primary">Read More</a>
+                {% if book.id not in wishlist_book_ids %}
+                <a href="{% url 'add_to_wishlist' book.id %}" class="btn btn-sm btn-danger ">wishlist</a>
+                {% endif %}
+                {% if book.id not in cart_book_ids %}
+                <a href="{% url 'add_to_cart' book.id %}" class="btn btn-sm btn-success">Add to Cart</a>
+                {% endif %}
+
+                <br>
+                <br>
+                <div class="social-share">
+                    <a class="mx-2 " href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}{% url 'book_detail' book.id %}" target="_blank">
+                        <i class="fab fa-facebook-square"></i> Share on Facebook
+                    </a>
+                    <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}{% url 'book_detail' book.id %}" target="_blank">
+                        <span class="fab fa-twitter-square"></span> Share on Twitter
+                    </a>
+
+                </div>
+               
             </div>
         </div>
     </div>

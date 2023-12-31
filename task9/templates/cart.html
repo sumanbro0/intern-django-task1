@@ -23,7 +23,9 @@
                         <td>{{ item.book.price }}</td>
                         <td>{{ item.quantity }}</td>
                         {% if item.price %}
-                        <td>{{ item.price|mul:item.quantity }}</td> {% endif %}
+                        <td>{{ item.price|mul:item.quantity }}</td>
+                        
+                        {% endif %}
                         <td>
                             <a href="{% url 'remove_from_cart' item.book.id %}" class="btn btn-danger btn-sm">Remove</a>
                         </td>

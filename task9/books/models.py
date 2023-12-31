@@ -44,3 +44,21 @@ class Order(models.Model):
     def __str__(self):
         return self.user.username
     
+
+class Wishlist(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    book=models.ForeignKey(Book,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.username
+    
+
+class Review(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    book=models.ForeignKey(Book,on_delete=models.CASCADE,related_name="reviews")
+    comment=models.TextField()
+    rating=models.IntegerField()
+
+    def __str__(self):
+        return self.user.username
+    

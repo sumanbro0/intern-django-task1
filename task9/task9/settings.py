@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'books',
     'mathfilters',
+    'django_social_share',
+
 ]
 
 MIDDLEWARE = [
