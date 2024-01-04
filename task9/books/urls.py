@@ -22,5 +22,8 @@ urlpatterns = [
     path("remove_from_wishlist/<int:id>",views.remove_from_wishlist,name="remove_from_wishlist"),
     path("add_review/<int:id>",views.add_review,name="add_review"),
     path("remove_review/<int:id>",views.remove_review,name="remove_review"),
-  
+    path("notifications/",views.notifications,name="notifications"),
+    path("delete_notification/<int:id>",views.delete_notification,name="delete_notification"),
+    path("my_books",views.my_books,name="my_books"),
+    path('read-book/<int:book_id>/', views.read_book, name='read_book'),
 ]

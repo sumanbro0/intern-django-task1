@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
@@ -6,11 +6,10 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.contrib import messages
 from .mail import send_verification
-from .models import Address, Book, Cart, Order, Review, Wishlist
+from .models import Address, Book, Cart, Notification, Order, Review, Wishlist
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.postgres.search import SearchVector
-
 
 
 # Create your views here.
@@ -154,6 +153,7 @@ def address(request):
     return render(request,'address.html',{'addresses':addresses})
 
 
+
 @login_required(login_url='login')
 def place_order(request):
     addr_id = request.GET.get('address')
@@ -166,7 +166,7 @@ def place_order(request):
     if num_orders > 5:
         total_price *= 0.75 
     
-    order = Order(user=request.user,address=address,total=total_price)
+    order = Order(user=request.user,address=address,total=total_price,cart=cart)
     order.save()
     for item in cart:
         item.ordered = True
@@ -242,3 +242,31 @@ def remove_review(request, id):
     return redirect('book_detail', id=review.book.id)
 
 
+
+def notifications(request):
+    notifications = Notification.objects.filter(user=request.user)
+    return render(request, 'notifications.html', {'notifications': notifications})
+
+
+
+def delete_notification(request, id):
+    notification = Notification.objects.get(id=id)
+    notification.delete()
+    return redirect('notifications')
+
+
+
+@login_required(login_url='login')
+def my_books(request):
+    orders=Order.objects.prefetch_related("cart").filter(user=request.user,status="delivered")
+    books=[]
+    for order in orders:
+        for item in order.cart.all():
+            books.append(item.book)
+    return render(request, 'my_books.html',{"books":books})
+    
+
+
+def read_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    return render(request, 'read_book.html', {'book': book})

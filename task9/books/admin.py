@@ -8,4 +8,4 @@ admin.site.register(models.Address)
 admin.site.register(models.Order)
 admin.site.register(models.Wishlist)
 admin.site.register(models.Review)
-
+admin.site.register(models.Notification)

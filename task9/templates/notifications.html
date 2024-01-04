@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block body  %}
+    <div class="container mt-4">
+        <h2>Notifications</h2>
+
+        {% if notifications %}
+            <div class="list-group">
+                {% for notification in notifications %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <a href="{{ notification.book_url|default:'#' }}">
+                                <h5 class="mb-1">{{ notification.message }}</h5>
+                            </a>
+                            <form method="post" action="{% url 'delete_notification' notification.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mt-4">You have no notifications.</p>
+        {% endif %}
+    </div>
+{% endblock body %}

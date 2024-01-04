@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block body %}
+<div id="canvas-container">
+    <canvas id="the-canvas"></canvas>
+
+</div>
+{% endblock body %}
+
+{% block script %}
+
+<script src="https://unpkg.com/pdfjs-dist@2.10.377/build/pdf.js"></script>
+
+<script>
+    var url = "{{ book.file.url }}";
+
+    var pdfjsLib = window['pdfjs-dist/build/pdf'];
+
+    var loadingTask = pdfjsLib.getDocument(url);
+    loadingTask.promise.then(function(pdf) {
+        var canvasContainer = document.getElementById('canvas-container');
+
+        for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            pdf.getPage(pageNum).then(function(page) {
+                var scale = 1.5;
+                var viewport = page.getViewport({scale: scale});
+
+                var canvas = document.createElement('canvas');
+                canvasContainer.appendChild(canvas);
+
+                var context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                var renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
+        }
+    });
+</script>
+{% endblock script %}
